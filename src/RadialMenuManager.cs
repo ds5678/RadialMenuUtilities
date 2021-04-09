@@ -46,30 +46,33 @@ namespace RadialMenuUtilities
 
         internal static void MaybeShowMenu()
         {
-            bool inPlacementMode = GameManager.GetPlayerManagerComponent().IsInPlacementMode();
-            bool overlayActive = IsOverlayActive();
-            if (!inPlacementMode && !overlayActive)
+            foreach (CustomRadialMenu radialMenu in radialMenuList)
             {
-                foreach (CustomRadialMenu radialMenu in radialMenuList)
+                if (radialMenu.enabled)
                 {
-                    if (radialMenu.enabled)
+                    KeyCode keyCode = radialMenu.GetKeyCode();
+                    if (KeyboardUtilities.InputManager.GetKeyDown(keyCode))
                     {
-                        KeyCode keyCode = radialMenu.GetKeyCode();
-                        if (KeyboardUtilities.InputManager.GetKeyDown(keyCode))
-                        {
-                            InputManager.OpenRadialMenu();
-                        }
-                        if (KeyboardUtilities.InputManager.GetKey(keyCode))
-                        {
-                            radialMenu.ShowGearItems();
-                        }
+                        if(CanShowRadialMenu()) InputManager.OpenRadialMenu();
+                    }
+                    if (KeyboardUtilities.InputManager.GetKey(keyCode))
+                    {
+                        if (CanShowRadialMenu()) radialMenu.ShowGearItems();
                     }
                 }
             }
+            
         }
 
-
+        public static bool CanShowRadialMenu()
+        {
+            return !GameManager.GetPlayerManagerComponent().IsInPlacementMode() && !IsOverlayActive();
+        }
         public static bool IsOverlayActive()
+        {
+            return (InterfaceManager.IsOverlayActiveCached() && !InterfaceManager.m_Panel_ActionsRadial.IsEnabled() || uConsole.IsOn());
+        }
+        /*public static bool IsOverlayActive()
         {
             return InterfaceManager.m_Panel_ActionPicker.IsEnabled() || InterfaceManager.m_Panel_Actions.IsEnabled()
                 || InterfaceManager.m_Panel_Affliction.IsEnabled() || InterfaceManager.m_Panel_Badges.IsEnabled() 
@@ -110,6 +113,6 @@ namespace RadialMenuUtilities
                 || GameManager.GetPlayerStruggleComponent().IsControllingCamera() 
                 || InterfaceManager.m_Panel_HUD.m_AccelTimePopup.IsActive() 
                 || GameManager.GetPlayerManagerComponent().IsInspectModeActive();
-        }
+        }*/
     }
 }
